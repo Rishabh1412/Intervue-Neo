@@ -16,7 +16,7 @@ interface SavedMessage {
   role: "user" | "system" | "assistant";
 }
 
-const Agent = ({ userName, userId, type }: AgentProps) => {
+const Agent = ({ username, userId, type }: AgentProps) => {
   const router = useRouter();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
@@ -64,15 +64,42 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
     if (callStatus === CallStatus.FINISHED) router.push("/");
   }, [messages, callStatus, userId, type]);
 
-  const handleCall = async () => {
+ const handleCall = async () => {
+  try {
+    // Set initial status
     setCallStatus(CallStatus.CONNECTING);
-    await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
-      variableValues: {
-        username: userName,
-        userid: userId,
-      },
-    });
-  };
+    
+    // Validate required parameters
+    if (!process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID) {
+      throw new Error('Missing workflow ID');
+    }
+    
+    if (!username || !userId) {
+      throw new Error('Missing user information');
+    }
+
+    // Initialize call with proper error handling
+    await vapi.start(
+        undefined, // 1. assistant
+        undefined, // 2. assistantOverrides
+        undefined, // 3. squad
+        process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, // 4. workflow
+        { // 5. workflowOverrides
+          variableValues: {
+            username: username,
+            userid: userId,
+          },
+        }
+      );
+
+  } catch (error) {
+    // Handle errors appropriately
+    console.error('Call initialization failed:', error);
+    setCallStatus(CallStatus.ERROR);
+    // You may want to show an error message to the user here
+  }
+};
+
 
   const handleDisconnect = async () => {
     setCallStatus(CallStatus.FINISHED);
@@ -103,7 +130,7 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
               width={540}
               className={"rounded-full object-cover size-[120px]"}
             />
-            <h3>{userName}</h3>
+            <h3>{username}</h3>
           </div>
         </div>
       </div>
@@ -111,13 +138,13 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
         <div className={"transcript-border"}>
           <div className={"transcript"}>
             <p
-              key={lastMessage}
+              key={lastestMessage}
               className={cn(
                 "transition-opacity duration-500 opacity-0",
                 "animate-fadeIn opacity-100"
               )}
             >
-              {lastMessage}
+              {lastestMessage}
             </p>
           </div>
         </div>
