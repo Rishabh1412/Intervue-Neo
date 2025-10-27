@@ -39,7 +39,9 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
     const onSpeechStart = () => setIsSpeaking(true);
     const onSpeechEnd = () => setIsSpeaking(false);
 
-    const onError = (error: Error) => console.error("Error:", error);
+    const onError = (error: any) => {
+      console.error("Vapi Error:", JSON.stringify(error, null, 2));
+    };
 
     vapi.on("call-start", onCallStart);
     vapi.on("call-end", onCallEnd);
@@ -126,15 +128,15 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
             <span
               className={cn(
                 "absolute animate-ping rounded-full opacity-75",
-                (callStatus !== "CONNECTING") && 'hidden'
+                callStatus !== "CONNECTING" && "hidden"
               )}
             />
-            <span>
-              {isCallInactiveOrFinished? "Call": ". . . "}
-            </span>
+            <span>{isCallInactiveOrFinished ? "Call" : ". . . "}</span>
           </button>
         ) : (
-          <button className={"btn-disconnect"} onClick={handleDisconnect}>End</button>
+          <button className={"btn-disconnect"} onClick={handleDisconnect}>
+            End
+          </button>
         )}
       </div>
     </>
