@@ -2,7 +2,6 @@ import {generateText} from "ai";
 import { google } from "@ai-sdk/google";
 import {getRandomInterviewCover} from "@/utils";
 import {db} from "@/firebase/admin";
-import {status} from "@grpc/grpc-js";
 
 export async function GET(){
     return Response.json({
@@ -46,7 +45,7 @@ export async function POST(req: Request){
         };
 
         await db.collection('interviews').add(interview);
-        return Response.json({success: true,data:interview}, {status :200});
+        return  Response.json({success: true,data:interview}, {status :200});
     }catch(err){
         console.log(err);
         return Response.json({success: false, error: err},{status:500});
