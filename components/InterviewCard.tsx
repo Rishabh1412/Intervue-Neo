@@ -29,7 +29,10 @@ const InterviewCard = async ({
   techstack,
   createdAt,
 }: InterviewCardProps) => {
-  const feedback = userId && id ? await getFeedbackInterviewId({interviewId: id,userId}):null; // Replace with actual feedback data when available
+  const feedback =
+    userId && id
+      ? await getFeedbackInterviewId({ interviewId: id, userId })
+      : null; // Replace with actual feedback data when available
   const normalizedType = /mix/gi.test(type) ? "Mixed" : type;
   const formattedDate = dayjs(
     feedback?.createdAt || createdAt || Date.now()
@@ -72,11 +75,7 @@ const InterviewCard = async ({
           <DisplayTextIcons techstack={techstack || []} />
           <div className="btn-primary flex items-center">
             <Link
-              href={
-                feedback
-                  ? `/interview/${id}/feedback`
-                  : `/interview/${id}`
-              }
+              href={feedback ? `/interview/${id}/feedback` : `/interview/${id}`}
             >
               {feedback ? "Check Feedback" : "View Interview"}
             </Link>

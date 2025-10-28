@@ -1,10 +1,9 @@
 "use server";
 
 import { feedbackSchema } from "@/constants";
-import { db, auth } from "@/firebase/admin";
+import { db } from "@/firebase/admin";
 import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
-import { cookies } from "next/headers";
 
 export async function getInterviewsByUserId(
   userId: string
@@ -56,11 +55,22 @@ export async function createFeedback(params: CreateFeedbackParams) {
       )
       .join("");
 
-    const { object : {totalScore,categoryScores,strengths,areasForImprovement,finalAssessment} } = await generateObject({
-      model: google("gemini-2.0-flash-001", {
-        structuredOutputs: false,
-      }),
-      schema: feedbackSchema,
+    const {
+      object: {
+        totalScore,
+        categoryScores,
+        strengths,
+        areasForImprovement,
+        finalAssessment,
+      },
+    } = await generateObject({
+      // --- FIX IS HERE ---
+      // 1. Use the newer, more reliable model
+      model: google("gemini-1.5-flash-latest"), 
+      // 2. REMOVED the 'structuredOutputs: false' line
+      // --- END FIX ---
+
+      schema: feedbackSchema, // Make sure this is a valid Zod schema
       prompt: `
         You are an AI interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
         Transcript:
@@ -76,22 +86,24 @@ export async function createFeedback(params: CreateFeedbackParams) {
       system:
         "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
     });
+    
+    console.log("Generated feedback:", { totalScore, categoryScores, strengths, areasForImprovement, finalAssessment });
 
     const feedback = await db.collection("feedback").add({
-        interviewId,
-        userId,
-        totalScore,
-        categoryScores,
-        strengths,
-        areasForImprovement,
-        finalAssessment,
-        createdAt: new Date().toISOString(),
+      interviewId,
+      userId,
+      totalScore,
+      categoryScores,
+      strengths,
+      areasForImprovement,
+      finalAssessment,
+      createdAt: new Date().toISOString(),
     });
 
     return {
-        success: true,
-        feedbackId: feedback.id,
-    }
+      success: true,
+      feedbackId: feedback.id,
+    };
   } catch (err) {
     console.log("Error creating feedback", err);
     return {
@@ -101,7 +113,6 @@ export async function createFeedback(params: CreateFeedbackParams) {
   }
 }
 
-
 export async function getFeedbackInterviewId(
   params: GetFeedbackByInterviewIdParams
 ): Promise<Feedback | null> {
@@ -109,7 +120,7 @@ export async function getFeedbackInterviewId(
 
   const feedback = await db
     .collection("feedback")
-    .where("inteviewId", "==", interviewId)
+    .where("interviewId", "==", interviewId)
     .where("userId", "==", userId)
     .limit(1)
     .get();
