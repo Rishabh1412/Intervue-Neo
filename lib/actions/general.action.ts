@@ -69,7 +69,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
     } = await generateObject({
       // --- FIX IS HERE ---
       // 1. Use the newer, more reliable model
-      model: google("gemini-1.5-flash-latest"), 
+      model: google("gemini-2.0-flash-001"), 
       // 2. REMOVED the 'structuredOutputs: false' line
       // --- END FIX ---
 
