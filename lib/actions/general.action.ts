@@ -54,6 +54,9 @@ export async function createFeedback(params: CreateFeedbackParams) {
           `- ${sentence.role}: ${sentence.content}\n`
       )
       .join("");
+    console.log("Formatted Transcript:", formattedTranscript);
+    console.log("Generating feedback with transcript length:", formattedTranscript.length);
+    console.log("Object generating");
 
     const {
       object: {

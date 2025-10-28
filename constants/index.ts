@@ -155,38 +155,44 @@ End the conversation on a polite and positive note.
   },
 };
 
+import { z } from "zod";
+
 export const feedbackSchema = z.object({
-  totalScore: z.number(),
-  categoryScores: z.tuple([
-    z.object({
-      name: z.literal("Communication Skills"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Technical Knowledge"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Problem Solving"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Cultural Fit"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Confidence and Clarity"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-  ]),
-  strengths: z.array(z.string()),
-  areasForImprovement: z.array(z.string()),
-  finalAssessment: z.string(),
+  totalScore: z.number().describe("The final aggregated score from 0-100."),
+
+  // --- THIS IS THE FIX ---
+  // We change z.tuple to z.array(z.object(...))
+  // and change z.literal to z.string for the 'name'.
+  categoryScores: z
+    .array(
+      z.object({
+        name: z
+          .string()
+          .describe(
+            "The name of the category being scored (e.g., 'Communication Skills')."
+          ),
+        score: z.number().describe("The score for this category (0-100)."),
+        comment: z
+          .string()
+          .describe(
+            "Detailed feedback or comments for this specific category."
+          ),
+      })
+    )
+    .describe("An array of objects, one for each scored category."),
+  // --- END FIX ---
+
+  strengths: z
+    .array(z.string())
+    .describe("A list of the candidate's key strengths."),
+  areasForImprovement: z
+    .array(z.string())
+    .describe("A list of the candidate's main areas for improvement."),
+  finalAssessment: z
+    .string()
+    .describe(
+      "A final, overall summary and assessment of the candidate's performance."
+    ),
 });
 
 export const interviewCovers = [
