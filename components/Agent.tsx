@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { vapi } from "@/lib/vapi.sdk";
 import Image from "next/image";
+import {interviewer} from "@/constants";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -16,7 +17,7 @@ interface SavedMessage {
   role: "user" | "system" | "assistant";
 }
 
-const Agent = ({ username, userId, type }: AgentProps) => {
+const Agent = ({ username, userId, type, interviewId, questions }: AgentProps) => {
   const router = useRouter();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
@@ -60,7 +61,31 @@ const Agent = ({ username, userId, type }: AgentProps) => {
     };
   }, []);
 
+  const handleGenerateFeedback = async(messages:SavedMessage[]){
+    console.log("Generate feedback here.");
+
+    // TODO : Create sever action that generates feedback
+    const {success, id} = {
+      success:true,
+      id:'feedback-id',
+    }
+
+    if(success & id){
+      router.push(`/interview/${interviewId}/feedback`);
+    }else{
+      console.log("Error saving feedback");
+      router.push('/');
+    }
+  }
+
   useEffect(() => {
+    if(callStatus === CallStatus.FINISHED){
+      if(type==='generate'){
+        router.push("/");
+      }else{
+        handleGenerateFeedback(messages);
+      }
+    }
     if (callStatus === CallStatus.FINISHED) router.push("/");
   }, [messages, callStatus, userId, type]);
 
@@ -68,30 +93,42 @@ const Agent = ({ username, userId, type }: AgentProps) => {
   try {
     // Set initial status
     setCallStatus(CallStatus.CONNECTING);
-    
-    // Validate required parameters
-    if (!process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID) {
-      throw new Error('Missing workflow ID');
-    }
-    
-    if (!username || !userId) {
-      throw new Error('Missing user information');
-    }
+    if(type === 'generate'){
+      // Validate required parameters
+      if (!process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID) {
+        throw new Error('Missing workflow ID');
+      }
 
-    // Initialize call with proper error handling
-    await vapi.start(
-        undefined, // 1. assistant
-        undefined, // 2. assistantOverrides
-        undefined, // 3. squad
-        process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, // 4. workflow
-        { // 5. workflowOverrides
-          variableValues: {
-            username: username,
-            userid: userId,
-          },
+      if (!username || !userId) {
+        throw new Error('Missing user information');
+      }
+
+      // Initialize call with proper error handling
+      await vapi.start(
+          undefined, // 1. assistant
+          undefined, // 2. assistantOverrides
+          undefined, // 3. squad
+          process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, // 4. workflow
+          { // 5. workflowOverrides
+            variableValues: {
+              username: username,
+              userid: userId,
+            },
+          }
+        );
+    }else{
+      let formattedQuestions= "";
+      if(questions){
+        formattedQuestions=questions
+            .map((question) => `- ${question}`)
+            .join('\n');
+      }
+      await vapi.start(interviewer,{
+        variableValues:{
+          questions:formattedQuestions,
         }
-      );
-
+      })
+    }
   } catch (error) {
     // Handle errors appropriately
     console.error('Call initialization failed:', error);
