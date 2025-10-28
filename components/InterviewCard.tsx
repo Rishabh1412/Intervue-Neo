@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getRandomInterviewCover } from "@/utils";
 import DisplayTextIcons from "./DisplayTextIcons";
+import { getFeedbackInterviewId } from "@/lib/actions/general.action";
 
 interface Feedback {
   totalScore?: number;
@@ -20,7 +21,7 @@ interface InterviewCardProps {
   createdAt?: string | Date;
 }
 
-const InterviewCard = ({
+const InterviewCard = async ({
   id,
   userId,
   role,
@@ -28,7 +29,7 @@ const InterviewCard = ({
   techstack,
   createdAt,
 }: InterviewCardProps) => {
-  const feedback = null as Feedback | null; // Replace with actual feedback data when available
+  const feedback = userId && id ? await getFeedbackInterviewId({interviewId: id,userId}):null; // Replace with actual feedback data when available
   const normalizedType = /mix/gi.test(type) ? "Mixed" : type;
   const formattedDate = dayjs(
     feedback?.createdAt || createdAt || Date.now()
