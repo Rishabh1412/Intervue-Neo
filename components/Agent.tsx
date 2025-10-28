@@ -122,7 +122,7 @@ const Agent = ({
         // Validate required parameters
         if (!process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID)
           throw new Error("Missing workflow ID");
-        if (!username || !userId) throw new Error("Missing user information");
+        if (!userName || !userId) throw new Error("Missing user information");
 
         // Initialize call with proper error handling
         await vapi.start(
@@ -133,7 +133,7 @@ const Agent = ({
           {
             // 5. workflowOverrides
             variableValues: {
-              username: username,
+              username: userName,
               userid: userId,
             },
           }

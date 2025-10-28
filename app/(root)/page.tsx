@@ -1,22 +1,33 @@
 import { Button } from "@/components/ui/button";
-import { dummyInterviews } from "@/constants";
 import Image from "next/image";
 import React from "react";
-import InterviewCard from '../../components/InterviewCard';
+import InterviewCard from "../../components/InterviewCard";
 import { getCurrentUser } from "@/lib/actions/auth.action";
-import { getInterviewsByUserId, getLatestInterviews } from "@/lib/actions/general.action";
+import {
+  getInterviewsByUserId,
+  getLatestInterviews,
+} from "@/lib/actions/general.action";
+import { redirect } from "next/navigation"; // 1. Import redirect
 
 const page = async () => {
   const user = await getCurrentUser();
 
-  //parallel fetching
-  const [userInterviews,latestInterviews] = await Promise.all([
-    await getInterviewsByUserId(user?.id!),
-    await getLatestInterviews({userId:user?.id!}),
-  ])
+  // 2. --- THIS IS THE FIX ---
+  // If there is no user, redirect to sign-in *before* fetching data.
+  if (!user || !user.id) {
+    redirect("/sign-in");
+  }
+  // --- END FIX ---
 
-  const hasPastInterviews = userInterviews?.length>0;
-  const hasUpcomingInterviews = latestInterviews?.length>0;
+  // 3. Now that you know the user exists, you can safely fetch data.
+  // Notice the "!" is removed because it's no longer needed.
+  const [userInterviews, latestInterviews] = await Promise.all([
+    getInterviewsByUserId(user.id),
+    getLatestInterviews({ userId: user.id }),
+  ]);
+
+  const hasPastInterviews = userInterviews?.length > 0;
+  const hasUpcomingInterviews = latestInterviews?.length > 0;
 
   return (
     <>
@@ -45,9 +56,10 @@ const page = async () => {
           {hasPastInterviews ? (
             userInterviews?.map((interview) => (
               <InterviewCard {...interview} key={interview.id} />
-          ))) : (
+            ))
+          ) : (
             <p>You have no past interviews. Start one now!</p>
-          )}     
+          )}
         </div>
       </section>
 
@@ -57,9 +69,10 @@ const page = async () => {
           {hasUpcomingInterviews ? (
             latestInterviews?.map((interview) => (
               <InterviewCard {...interview} key={interview.id} />
-          ))) : (
+            ))
+          ) : (
             <p>There are no interviews available</p>
-          )}   
+          )}
           {/*<p>There are no interviews available</p>*/}
         </div>
       </section>
