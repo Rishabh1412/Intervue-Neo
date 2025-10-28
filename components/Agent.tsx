@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { vapi } from "@/lib/vapi.sdk";
+import Image from "next/image";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -110,7 +110,6 @@ const Agent = ({ username, userId, type }: AgentProps) => {
   const isCallInactiveOrFinished =
     callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
 
-  //   const lastMessage = messages[messages.length - 1];
   return (
     <>
       <div className="call-view">
@@ -138,13 +137,13 @@ const Agent = ({ username, userId, type }: AgentProps) => {
         <div className={"transcript-border"}>
           <div className={"transcript"}>
             <p
-              key={lastestMessage}
+              key={latestMessage}
               className={cn(
                 "transition-opacity duration-500 opacity-0",
                 "animate-fadeIn opacity-100"
               )}
             >
-              {lastestMessage}
+              {latestMessage}
             </p>
           </div>
         </div>

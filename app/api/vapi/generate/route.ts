@@ -14,7 +14,7 @@ export async function GET(){
 
 export async function POST(req: Request){
     const {type,role,level,techstack,amount,userid } = await req.json();
-
+    console.log("Generating interview questions for:", {type,role,level,techstack,amount,userid });
     try{
         const { text: questions } = await generateText({
             model: google("gemini-2.0-flash-001"),
@@ -43,7 +43,7 @@ export async function POST(req: Request){
             coverImage: getRandomInterviewCover(),
             createdAt: new Date().toISOString(),
         };
-
+        console.log("Generated Interview Questions:", questions);
         await db.collection('interviews').add(interview);
         return  Response.json({success: true,data:interview}, {status :200});
     }catch(err){
