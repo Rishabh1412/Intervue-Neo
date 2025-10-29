@@ -47,6 +47,7 @@ const page = async () => {
           className="max-sm:hidden"
           width={400}
           height={400}
+          priority
         />
       </section>
 

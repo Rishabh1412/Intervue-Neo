@@ -20,7 +20,7 @@ const page = async ({params}:RouteParams) => {
       <div className={"flex flex-row gap-4 justify-between"}>
         <div className={"flex flex-row gap-4 items-center max-sm:flex-col"}>
           <div className={"flex flex-row gap-4 items-center"}>
-            <Image src={getRandomInterviewCover()} alt={"cover-image"} height={40} width={40} className={"rounded-full object-cover size-[40px"}/>
+            <Image src={getRandomInterviewCover()} alt={"cover-image"} height={40} width={40} priority className={"rounded-full object-cover size-[40px"}/>
             <h3 className={"capitalize"}>{interview.role}</h3>
           </div>
           <DisplayTextIcons techstack={interview.techstack}/>

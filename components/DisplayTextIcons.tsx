@@ -25,6 +25,7 @@ const DisplayTextIcons = async ({ techstack }: TechIconProps) => {
             width={20}
             height={20}
             className="size-5  object-contain"
+            priority
           />
         </div>
       ))}
